@@ -1,0 +1,49 @@
+pig -x local
+
+emp_details = LOAD '/home/acadgild/hadoop/employee_details.txt' USING PigStorage(',') AS (emp_id:int, emp_name:chararray, emp_salary:int, emp_rating:int);
+DESCRIBE emp_details
+DUMP emp_details
+
+emp_expenses = LOAD '/home/acadgild/hadoop/employee_expenses.txt' AS (emp_id:int, expenses:int);
+DESCRIBE emp_expenses
+DUMP emp_expenses
+
+///Question-5.1-a///
+order_by_emp_name_rating = ORDER emp_details BY emp_rating ASC,emp_name ASC;
+DESCRIBE order_by_emp_name_rating
+DUMP order_by_emp_name_rating
+top_5_emp = limit order_by_emp_name_rating 5
+DESCRIBE top_5_emp
+DUMP top_5_emp
+
+///Question-5.1-b///
+filtered_emp_id = FILTER emp_details by emp_id%2!=0;
+DESCRIBE filtered_emp_id
+DUMP filtered_emp_id
+order_by_emp_name_salary = ORDER filtered_emp_id BY emp_salary DESC,emp_name ASC;
+DESCRIBE order_by_emp_name_salary
+DUMP order_by_emp_name_salary
+top_3_emp = limit order_by_emp_name_salary 3
+DUMP top_3_emp
+
+///Question-5.1-c///
+joined_data = join emp_details by emp_id , emp_expenses by emp_id;
+DESCRIBE joined_data
+DUMP joined_data
+grunt> order_by_emp_name_expenses = ORDER joined_data BY expenses DESC, emp_name ASC;
+DUMP order_by_emp_name_expenses
+emp_max_expenses = limit order_by_emp_name_expenses 1;
+DUMP emp_max_expenses
+
+///Question-5.1-d///
+joined_data = join emp_details by emp_id , emp_expenses by emp_id;
+DESCRIBE joined_data
+DUMP joined_data
+
+///Question-5.1-e///
+full_outer_joined_data = join emp_details by emp_id full outer, emp_expenses by emp_id;
+DESCRIBE full_outer_joined_data
+DUMP full_outer_joined_data
+filtered_emp_id_name = FILTER full_outer_joined_data BY emp_expenses::emp_id is null;
+final_list = FOREACH flitered_emp_id_name GENERATE $0,$1;
+DUMP final_list
